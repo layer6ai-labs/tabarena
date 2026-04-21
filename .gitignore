@@ -136,9 +136,14 @@ autogluon/
 /examples/task_cache/
 /examples/experiments/
 /examples/eval/
+/AutogluonModels/
 /examples/**/AutogluonModels/
 /examples/benchmarking/custom_tabarena_model/evals/
 /examples/benchmarking/custom_tabarena_model/tabarena_out/
+/examples/benchmarking/custom_tabarena_model/tabarena_cache/
+/third_party/
+/std.out
+/uv.lock
 /examples/benchmarking/eval/
 /examples/benchmarking/experiments/
 /examples/!old/local_data/
