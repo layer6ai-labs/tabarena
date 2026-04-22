@@ -94,12 +94,14 @@ folder name works; you will pass `<run_path>` on the command line in later steps
 
 ```bash
 cd tabarena/examples/benchmarking/custom_tabarena_model
+python run_custom_internal_tabdpt_on_tabarena_lite.py \
+    --run-path <run_path> --run-name <your chosen run name>
 
-# Example command if the checkpoint locates in runs/NoRetrieval/Small_latest
+# Example: command if the checkpoint locates in runs/NoRetrieval/Small_latest
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path NoRetrieval/Small_latest --run-name small_latest
 
-# Example with retrieval-mode inference
+# Example: with retrieval-mode inference
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path NoRetrieval/Small_latest --run-name small_latest_retr --use-retrieval
 ```
@@ -121,6 +123,9 @@ Raw per-task predictions and `results.pkl` files land in
 ### 3. Evaluate against the leaderboard
 
 ```bash
+python run_evaluate_internal_tabdpt.py --run-name <your chosen run name>
+
+# Example:
 python run_evaluate_internal_tabdpt.py --run-name small_latest
 ```
 
