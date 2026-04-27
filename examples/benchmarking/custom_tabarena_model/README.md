@@ -43,17 +43,10 @@ cd ..
 
 ### 2. Install the TabArena environment
 
-This matches TabArena's official instructions (editable AutoGluon + TabArena benchmark
-extra inside a dedicated `uv` venv). 
-
 ```bash
 # Dedicated venv
 uv venv --seed --python 3.12 ~/.venvs/tabarena
 source ~/.venvs/tabarena/bin/activate
-
-# AutoGluon (editable from source)
-git clone https://github.com/autogluon/autogluon.git
-./autogluon/full_install.sh
 
 # TabArena (benchmark extra)
 cd tabarena
@@ -78,10 +71,8 @@ edits to Internal-TabDPT are picked up without reinstalling:
 cd <tabarena-root>
 mkdir -p third_party
 ln -s ../../Internal-TabDPT third_party/Internal-TabDPT
-
-# Make the symlinked Internal-TabDPT importable as `tabdpt` inside the tabarena env
-uv pip install -e third_party/Internal-TabDPT
 ```
+
 
 ## Usage
 
@@ -96,12 +87,11 @@ folder name works; you will pass `<run_path>` on the command line in later steps
 cd tabarena/examples/benchmarking/custom_tabarena_model
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path <run_path> --run-name <your chosen run name>
-
-# Example: command if the checkpoint locates in runs/NoRetrieval/Small_latest
+# Example command if the checkpoint locates in runs/NoRetrieval/Small_latest
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path NoRetrieval/Small_latest --run-name small_latest
 
-# Example: with retrieval-mode inference
+# Example with retrieval-mode inference
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path NoRetrieval/Small_latest --run-name small_latest_retr --use-retrieval
 ```
@@ -140,4 +130,3 @@ Outputs will be printed in the console output as well as saved in `./evals/<run-
 - `results_per_split.csv`    — per-split raw numbers
 - `tuning-impact-elo.pdf`    — **main Elo rank plot** (this is the headline figure to read off a run)
 - `*.pdf`                    — other plots: Pareto fronts, winrate matrix, time plots
-
