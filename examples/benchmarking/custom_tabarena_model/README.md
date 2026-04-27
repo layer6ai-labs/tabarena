@@ -73,7 +73,6 @@ mkdir -p third_party
 ln -s ../../Internal-TabDPT third_party/Internal-TabDPT
 ```
 
-
 ## Usage
 
 ### 1. Drop in a checkpoint
@@ -87,11 +86,12 @@ folder name works; you will pass `<run_path>` on the command line in later steps
 cd tabarena/examples/benchmarking/custom_tabarena_model
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path <run_path> --run-name <your chosen run name>
-# Example command if the checkpoint locates in runs/NoRetrieval/Small_latest
+
+# Example: command if the checkpoint locates in runs/NoRetrieval/Small_latest
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path NoRetrieval/Small_latest --run-name small_latest
 
-# Example with retrieval-mode inference
+# Example: with retrieval-mode inference
 python run_custom_internal_tabdpt_on_tabarena_lite.py \
     --run-path NoRetrieval/Small_latest --run-name small_latest_retr --use-retrieval
 ```
@@ -130,3 +130,4 @@ Outputs will be printed in the console output as well as saved in `./evals/<run-
 - `results_per_split.csv`    — per-split raw numbers
 - `tuning-impact-elo.pdf`    — **main Elo rank plot** (this is the headline figure to read off a run)
 - `*.pdf`                    — other plots: Pareto fronts, winrate matrix, time plots
+
