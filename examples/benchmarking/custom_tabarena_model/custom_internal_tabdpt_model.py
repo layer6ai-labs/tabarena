@@ -95,9 +95,9 @@ class CustomInternalTabDPTModel(AbstractTorchModel):
         _ensure_on_syspath(repo_path)
         checkpoint = _resolve_checkpoint(repo_path, run_path)
 
-        if num_gpus >= 1 and not cuda_is_available():
+        if num_gpus > 0 and not cuda_is_available():
             raise AssertionError("Fit requested a GPU but CUDA is not available.")
-        device = "cuda:0" if num_gpus >= 1 else "cpu"
+        device = "cuda:0" if num_gpus > 0 else "cpu"
 
         import tabdpt
         from tabdpt import TabDPTClassifier, TabDPTRegressor

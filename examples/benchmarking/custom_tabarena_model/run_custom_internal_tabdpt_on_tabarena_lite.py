@@ -8,6 +8,10 @@ Example:
 Point ``--run-path`` at a folder inside ``Internal-TabDPT/runs/`` that contains a
 ``latest.ckpt`` file. Results go to ``./tabarena_out/<run-name>/``; pass the same
 ``--run-name`` to ``run_evaluate_internal_tabdpt.py`` afterwards.
+
+Always re-fits every task (``cache_mode="ignore"``) so re-runs reflect the current
+checkpoint and wrapper code; existing ``results.pkl`` files under
+``./tabarena_out/<run-name>/`` are overwritten.
 """
 
 from __future__ import annotations
@@ -71,6 +75,7 @@ def main() -> None:
         model_experiments=get_configs_for_custom_internal_tabdpt(config_overrides=overrides),
         tasks=openml.study.get_suite("tabarena-v0.1").tasks,
         repetitions_mode="TabArena-Lite",
+        cache_mode="ignore",
     )
 
 
