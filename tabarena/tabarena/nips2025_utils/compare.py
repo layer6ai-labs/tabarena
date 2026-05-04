@@ -127,16 +127,16 @@ def compare(
         figure_file_type=figure_file_type,
     )
 
-    return plotter.eval(
-        df_results=df_results,
-        plot_extra_barplots=False,
-        plot_times=True,
-        calibration_framework=calibration_framework,
-        average_seeds=average_seeds,
-        tmp_treat_tasks_independently=tmp_treat_tasks_independently,
-        leaderboard_kwargs=leaderboard_kwargs,
-        **kwargs,
-    )
+    eval_kwargs = {
+        "plot_extra_barplots": False,
+        "plot_times": True,
+        "calibration_framework": calibration_framework,
+        "average_seeds": average_seeds,
+        "tmp_treat_tasks_independently": tmp_treat_tasks_independently,
+        "leaderboard_kwargs": leaderboard_kwargs,
+    }
+    eval_kwargs.update(kwargs)
+    return plotter.eval(df_results=df_results, **eval_kwargs)
 
 
 def filter_to_valid_tasks(df_to_filter: pd.DataFrame, df_filter: pd.DataFrame) -> pd.DataFrame:

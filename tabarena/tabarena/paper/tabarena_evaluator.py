@@ -310,8 +310,14 @@ class TabArenaEvaluator:
         df_results_rank_compare['time_infer_s_per_1K'] = df_results_rank_compare['time_infer_s'] * 1000 / df_results_rank_compare["dataset"].map(
             dataset_to_n_samples_test)
 
+        df_times = self._subset_rows_for_plot_tune_types(
+            df_results_rank_compare,
+            f_map_inverse=f_map_inverse,
+            baselines=baselines,
+            plot_tune_types=plot_tune_types,
+        )
         if plot_times:
-            self.plot_tabarena_times(df=df_results_rank_compare, output_dir=self.output_dir, show=False)
+            self.plot_tabarena_times(df=df_times, output_dir=self.output_dir, show=False)
 
         # TODO: Move this into the `.leaderboard` call
         if "normalized-error-dataset" not in df_results_rank_compare.columns:
@@ -377,6 +383,14 @@ class TabArenaEvaluator:
         if tmp_treat_tasks_independently:
             df_results_rank_compare["dataset"] = df_results_rank_compare["dataset"] + "_" + df_results_rank_compare["fold"].astype(str)
             df_results_rank_compare["fold"] = 0
+
+        df_plots = self._subset_rows_for_plot_tune_types(
+            df_results_rank_compare,
+            f_map_inverse=f_map_inverse,
+            baselines=baselines,
+            plot_tune_types=plot_tune_types,
+        )
+        plot_method_names = set(df_plots[self.method_col].unique())
 
         tabarena = TabArena(
             method_col=self.method_col,
@@ -480,24 +494,32 @@ class TabArenaEvaluator:
                 name = " ".join(parts)
                 return name.replace('(tuned + ensemble)', '(T+E)')
 
-            # use tuned+ensembled version if available, and default otherwise
-            tune_methods = results_per_task[self.method_col].map(method_info["method_subtype"])
-            method_types = results_per_task[self.method_col].map(method_info["config_type"]).fillna(results_per_task[self.method_col])
+            if plot_tune_types:
+                results_te_per_task = results_per_task[
+                    results_per_task[self.method_col].isin(plot_method_names)
+                ]
+                results_te_per_split = results_per_split[
+                    results_per_split[self.method_col].isin(plot_method_names)
+                ]
+            else:
+                # use tuned+ensembled version if available, and default otherwise
+                tune_methods = results_per_task[self.method_col].map(method_info["method_subtype"])
+                method_types = results_per_task[self.method_col].map(method_info["config_type"]).fillna(results_per_task[self.method_col])
 
-            tuned_ens_types = method_types[tune_methods == 'tuned_ensemble']
-            per_task_filter = (tune_methods == 'tuned_ensemble') | ((tune_methods == 'default') & ~method_types.isin(tuned_ens_types))
+                tuned_ens_types = method_types[tune_methods == 'tuned_ensemble']
+                per_task_filter = (tune_methods == 'tuned_ensemble') | ((tune_methods == 'default') & ~method_types.isin(tuned_ens_types))
 
-            tune_methods_split = results_per_split[self.method_col].map(method_info["method_subtype"])
-            method_types_split = results_per_split[self.method_col].map(method_info["config_type"]).fillna(results_per_split[self.method_col])
-            tuned_ens_types_split = method_types_split[tune_methods_split == 'tuned_ensemble']
-            per_split_filter = (tune_methods_split == 'tuned_ensemble') | ((tune_methods_split == 'default') & ~method_types_split.isin(tuned_ens_types_split))
+                tune_methods_split = results_per_split[self.method_col].map(method_info["method_subtype"])
+                method_types_split = results_per_split[self.method_col].map(method_info["config_type"]).fillna(results_per_split[self.method_col])
+                tuned_ens_types_split = method_types_split[tune_methods_split == 'tuned_ensemble']
+                per_split_filter = (tune_methods_split == 'tuned_ensemble') | ((tune_methods_split == 'default') & ~method_types_split.isin(tuned_ens_types_split))
 
-            if plot_with_baselines:
-                per_task_filter = per_task_filter | results_per_task[self.method_col].isin(baselines)
-                per_split_filter = per_split_filter | results_per_split[self.method_col].isin(baselines)
+                if plot_with_baselines:
+                    per_task_filter = per_task_filter | results_per_task[self.method_col].isin(baselines)
+                    per_split_filter = per_split_filter | results_per_split[self.method_col].isin(baselines)
 
-            results_te_per_task = results_per_task[per_task_filter]
-            results_te_per_split = results_per_split[per_split_filter]
+                results_te_per_task = results_per_task[per_task_filter]
+                results_te_per_split = results_per_split[per_split_filter]
 
             results_te_per_task.loc[:, self.method_col] = results_te_per_task[self.method_col].map(rename_model)
             results_te_per_split.loc[:, self.method_col] = results_te_per_split[self.method_col].map(rename_model)
@@ -534,11 +556,16 @@ class TabArenaEvaluator:
                     )
 
         if plot_runtimes:
-            self.generate_runtime_plot(df_results=df_results_rank_compare)
+            self.generate_runtime_plot(df_results=df_plots)
 
         if plot_pareto and (framework_types or plot_with_baselines):
+            leaderboard_pareto_in = leaderboard
+            if plot_tune_types:
+                leaderboard_pareto_in = leaderboard[
+                    leaderboard[self.method_col].isin(plot_method_names)
+                ].copy()
             self.plot_pareto(
-                leaderboard=leaderboard,
+                leaderboard=leaderboard_pareto_in,
                 framework_types=framework_types,
                 with_baselines=plot_with_baselines,
                 plot_tuning_kwargs=plot_tuning_kwargs,
@@ -572,6 +599,22 @@ class TabArenaEvaluator:
                 f"Found NaN values in '{self.method_col}' column: "
                 f"{missing_count}/{len(df_results)} ({missing_percent * 100:.1f}%) were NaN."
             )
+
+    def _subset_rows_for_plot_tune_types(
+        self,
+        df: pd.DataFrame,
+        *,
+        f_map_inverse: dict,
+        baselines: list[str],
+        plot_tune_types: list[str] | None,
+    ) -> pd.DataFrame:
+        """Same row filter as plot_tuning_impact: keep baselines + selected tune_method rows."""
+        if not plot_tune_types:
+            return df
+        tune_method = df[self.method_col].map(f_map_inverse).fillna("default")
+        return df.loc[
+            tune_method.isin(plot_tune_types) | df[self.method_col].isin(baselines)
+        ].copy()
 
     def filter_results(self, df_results: pd.DataFrame):
         if self.datasets is not None:
