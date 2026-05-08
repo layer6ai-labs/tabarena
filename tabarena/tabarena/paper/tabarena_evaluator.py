@@ -1186,9 +1186,9 @@ class TabArenaEvaluator:
             metric].mean().reset_index()
 
         df_plot_w_mean_2 = df_plot_w_mean_2.sort_values(by=metric, ascending=lower_is_better)
-        baseline_means = {}
-        for baseline in baselines:
-            baseline_means[baseline] = df_plot_w_mean_2[df_plot_w_mean_2["framework_type"] == baseline][metric].iloc[0]
+        # baseline_means = {}
+        # for baseline in baselines:
+        #     baseline_means[baseline] = df_plot_w_mean_2[df_plot_w_mean_2["framework_type"] == baseline][metric].iloc[0]
 
         df_plot_w_mean_2 = df_plot_w_mean_2[~df_plot_w_mean_2["framework_type"].isin(baselines)]
 
@@ -1243,10 +1243,10 @@ class TabArenaEvaluator:
 
                 fig, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 
-                if use_y:
-                    baseline_func = ax.axvline
-                else:
-                    baseline_func = ax.axhline
+                # if use_y:
+                #     baseline_func = ax.axvline
+                # else:
+                #     baseline_func = ax.axhline
 
                 linewidth = 0.0 if use_y else 0.3
                 err_linewidth = 1.6
@@ -1347,70 +1347,66 @@ class TabArenaEvaluator:
                     boxplot.set(xlabel=None, ylabel='Elo' if metric=='elo' else 'Normalized score')  # remove method in the x-axis
                 # boxplot.set_title("Effect of tuning and ensembling")
 
-                # do this before setting x/y limits
-                for baseline_idx, (baseline, color) in enumerate(zip(baselines, baseline_colors)):
-                    baseline_mean = baseline_means[baseline]
-
-                    style_raw = method_style_map.get(baseline, None)
-                    style = _normalize_style(style_raw)
-                    baseline_label = style.get("display_name", baseline)
-
-                    # color default fallback remains baseline_colors if style doesn't specify color
-                    color_final = style.get("color", color)
-                    alpha_final = style.get("alpha", 1.0)
-
-                    # line kwargs
-                    line_kwargs = dict(
-                        color=color_final,
-                        alpha=alpha_final,
-                        linewidth=style.get("line_width", 2.0),
-                        ls=style.get("line_ls", "--"),
-                        zorder=style.get("line_zorder", -10),
-                    )
-                    baseline_func(baseline_mean, **line_kwargs)
-
-                    # text kwargs (reuse text_* or plain text keys)
-                    text_kwargs = dict(
-                        color=style.get("text_color", color_final),
-                        alpha=style.get("text_alpha", alpha_final),
-                    )
-                    fontsize = style.get("text_fontsize", style.get("fontsize"))
-                    if fontsize is not None:
-                        text_kwargs["fontsize"] = fontsize
-
-                    for k_src, k_dst in [
-                        ("fontweight", "fontweight"),
-                        ("fontstyle", "fontstyle"),
-                        ("fontsize", "fontsize"),
-                    ]:
-                        v = style.get(f"text_{k_src}", style.get(k_src))
-                        if v is not None:
-                            text_kwargs[k_dst] = v
-
-                    # drop None values to avoid overriding matplotlib defaults
-                    text_kwargs = {k: v for k, v in text_kwargs.items() if v is not None}
-
-                    if use_y:
-                        txt = ax.text(
-                            y=(1 - 0.035 * (1 + 2 * baseline_text_y_gap * (len(baselines) - 1 - baseline_idx))) * ax.get_ylim()[0],
-                            x=baseline_mean * 0.99,
-                            s=baseline_label,
-                            ha="right",
-                            **text_kwargs,
-                        )
-                    else:
-                        txt = ax.text(
-                            x=0.5,
-                            y=baseline_mean * 0.97,
-                            s=baseline_label,
-                            va="top",
-                            **text_kwargs,
-                        )
-                    txt.set_path_effects([PathEffects.withStroke(
-                        linewidth=2,
-                        foreground='white',
-                        alpha=0.5,
-                    )])
+                # Baseline dashed reference lines + labels (e.g. AutoGluon 1.4/1.5) — disabled.
+                # for baseline_idx, (baseline, color) in enumerate(zip(baselines, baseline_colors)):
+                #     baseline_mean = baseline_means[baseline]
+                #
+                #     style_raw = method_style_map.get(baseline, None)
+                #     style = _normalize_style(style_raw)
+                #     baseline_label = style.get("display_name", baseline)
+                #
+                #     color_final = style.get("color", color)
+                #     alpha_final = style.get("alpha", 1.0)
+                #
+                #     line_kwargs = dict(
+                #         color=color_final,
+                #         alpha=alpha_final,
+                #         linewidth=style.get("line_width", 2.0),
+                #         ls=style.get("line_ls", "--"),
+                #         zorder=style.get("line_zorder", -10),
+                #     )
+                #     baseline_func(baseline_mean, **line_kwargs)
+                #
+                #     text_kwargs = dict(
+                #         color=style.get("text_color", color_final),
+                #         alpha=style.get("text_alpha", alpha_final),
+                #     )
+                #     fontsize = style.get("text_fontsize", style.get("fontsize"))
+                #     if fontsize is not None:
+                #         text_kwargs["fontsize"] = fontsize
+                #
+                #     for k_src, k_dst in [
+                #         ("fontweight", "fontweight"),
+                #         ("fontstyle", "fontstyle"),
+                #         ("fontsize", "fontsize"),
+                #     ]:
+                #         v = style.get(f"text_{k_src}", style.get(k_src))
+                #         if v is not None:
+                #             text_kwargs[k_dst] = v
+                #
+                #     text_kwargs = {k: v for k, v in text_kwargs.items() if v is not None}
+                #
+                #     if use_y:
+                #         txt = ax.text(
+                #             y=(1 - 0.035 * (1 + 2 * baseline_text_y_gap * (len(baselines) - 1 - baseline_idx))) * ax.get_ylim()[0],
+                #             x=baseline_mean * 0.99,
+                #             s=baseline_label,
+                #             ha="right",
+                #             **text_kwargs,
+                #         )
+                #     else:
+                #         txt = ax.text(
+                #             x=0.5,
+                #             y=baseline_mean * 0.97,
+                #             s=baseline_label,
+                #             va="top",
+                #             **text_kwargs,
+                #         )
+                #     txt.set_path_effects([PathEffects.withStroke(
+                #         linewidth=2,
+                #         foreground='white',
+                #         alpha=0.5,
+                #     )])
 
                 if ylim is not None:
                     ax.set_ylim(ylim)
