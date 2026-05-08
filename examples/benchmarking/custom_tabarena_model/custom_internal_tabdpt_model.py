@@ -41,8 +41,8 @@ def _ensure_on_syspath(repo_path: Path) -> None:
 class CustomInternalTabDPTModel(AbstractTorchModel):
     """Wraps Internal-TabDPT's TabDPTClassifier / TabDPTRegressor as a TabArena model."""
 
-    ag_key = "INT-TABDPT"
-    ag_name = "Internal-TabDPT"
+    ag_key = "TabDPT-Turbo"
+    ag_name = "TabDPT-Turbo"
     seed_name = "seed"
     default_random_seed = 0
 
